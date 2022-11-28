@@ -1,0 +1,93 @@
+{{- if eq $.Values.labels.environment "qa" }}  
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: blast-{{ .Values.labels.name }}-qa-cm
+data:
+  config.toml: |
+    [redis]
+      host = "{{ .Values.redisHost }}"
+    [sqs]
+      q_name = "{{ .Values.sqsQueue }}"
+      role_arn = "{{ .Values.role.assumed }}"
+    {{- if eq $.Values.labels.purpose "public" }}
+    [public_api]
+      enabled = true
+      http_requests_per_interval = {{ .Values.rateLimitRpc }}
+      ws_requests_per_interval = {{ .Values.rateLimitWs }}
+    {{- end }}
+    [http]
+      keep_alive = true
+    [liveness]
+      interval_seconds = 10
+      failed_threshold = 3
+
+    [[apis]]
+    name = "ethereum-debug"
+    methods = [
+        { name = "debug_traceTransaction", filters = [{ name = "Archive" }] },
+        { name = "debug_traceBlockByHash", filters = [{ name = "Archive" }] },
+        { name = "debug_traceBlockByNumber", filters = [{ name = "Archive" }] },
+    ]
+
+    [[apis]]
+    name = "evm-common"
+    methods = [
+        { name = "eth_blockNumber" },
+        { name = "eth_call" },
+        { name = "eth_chainId" },
+        { name = "eth_estimateGas" },
+        { name = "eth_gasPrice" },
+        { name = "eth_getBalance" },
+        { name = "eth_getBlockByHash" },
+        { name = "eth_getBlockByNumber" },
+        { name = "eth_getBlockTransactionCountByHash" },
+        { name = "eth_getBlockTransactionCountByNumber" },
+        { name = "eth_getCode" },
+        { name = "eth_getLogs", filters = [{ name = "Private" }, { "name" = "BlockRange", "args" = [500]}] },
+        { name = "eth_getStorageAt" },
+        { name = "eth_getTransactionByBlockHashAndIndex" },
+        { name = "eth_getTransactionByBlockNumberAndIndex" },
+        { name = "eth_getTransactionByHash" },
+        { name = "eth_getTransactionCount" },
+        { name = "eth_getTransactionReceipt" },
+        { name = "eth_getUncleByBlockHashAndIndex" },
+        { name = "eth_getUncleByBlockNumberAndIndex" },
+        { name = "eth_getUncleCountByBlockHash" },
+        { name = "eth_getUncleCountByBlockNumber" },
+        { name = "eth_maxPriorityFeePerGas" },
+        { name = "eth_sendRawTransaction" },
+        { name = "eth_subscribe", filters = [{ name = "Private" }] },
+        { name = "eth_unsubscribe", filters = [{ name = "Private" }] },
+        { name = "net_listening" },
+        { name = "net_peerCount" },
+        { name = "net_version" },
+        { name = "web3_clientVersion" },
+        { name = "web3_sha3" },
+    ]
+
+    [[apis]]
+    name = "optimism"
+    methods = [
+        { name = "eth_getProof" },
+        { name = "rollup_gasPrices" },
+        { name = "rollup_getInfo" },
+    ]
+
+    [[networks]]
+    name = "optimism-mainnet"
+    apis = [ "evm-common", "optimism", "ethereum-debug" ]
+
+    [[nodes]]
+    network = "optimism-mainnet"
+    rpc_url = "http://15.204.140.184:9993"
+    ws_url = "http://15.204.140.184:9994"
+    [[nodes]]
+    network = "optimism-mainnet"
+    rpc_url = "http://15.204.143.142:9993"
+    ws_url = "http://15.204.143.142:9994"
+    [[nodes]]
+    network = "optimism-mainnet"
+    rpc_url = "http://15.204.143.177:9933"
+    ws_url = "http://15.204.143.177:9994"
+{{- end }}
