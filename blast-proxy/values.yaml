@@ -1,0 +1,47 @@
+replicaCount: 1
+hostNetwork: false
+dnsPolicy: ClusterFirst
+imagePullPolicy: Always
+
+labels:
+  name: api-proxy-general
+  region: eu-central-1
+  environment: preprod
+  network: testnet
+  shortRegion: euc1
+
+componentEnabled:
+  service: true
+  serviceMonitor: true
+  ingress: false
+
+image:
+  tag: 2.1.20
+
+services:
+  proxy:
+    protocol: TCP
+    externalPort: 8090
+    internalPort: 8090
+  metrics:
+    protocol: TCP
+    externalPort: 8092
+    internalPort: 8092
+
+service:
+  account:
+    name: blast-api-proxy-sa
+
+tolerations: 
+  - key: application
+    value: blast-proxy
+    effect: NoSchedule
+
+replicaCount: 3
+
+crossAccount: false
+
+affinity: {}
+
+rateLimitRpc: 10
+rateLimitWs: 25

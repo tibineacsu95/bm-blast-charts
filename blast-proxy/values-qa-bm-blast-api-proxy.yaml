@@ -1,0 +1,14 @@
+redisHost: qa-bm-blast-0-redis-master.infra-redis
+sqsQueue: StatsQueueQA.fifo
+sqsRegion: us-west-2
+labels:
+  region: us-west-2
+  shortRegion: usw2
+  environment: qa
+  name: api-proxy-general-public
+  purpose: public
+image:
+  name: 103729285663.dkr.ecr.us-west-2.amazonaws.com/blast-api-proxy
+  tag: 3.0.26-testnet
+rateLimitRpc: 30
+rateLimitWs: 25

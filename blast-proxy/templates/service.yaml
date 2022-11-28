@@ -1,0 +1,24 @@
+{{- if .Values.componentEnabled.service }}
+apiVersion: v1
+kind: Service
+metadata:
+  name: blast-{{ .Values.labels.name }}-{{ .Values.labels.shortRegion }}
+  labels:
+    app.kubernetes.io/component: blast-{{ .Values.labels.name }}-{{ .Values.labels.shortRegion }}-service
+    app.kubernetes.io/instance: blast-{{ .Values.labels.name }}-{{ .Values.labels.shortRegion }}
+    app.kubernetes.io/name: blast-{{ .Values.labels.name }}-{{ .Values.labels.shortRegion }}
+    app.kubernetes.io/part-of: blast
+spec:
+  type: ClusterIP
+  selector:
+    app.kubernetes.io/instance: blast-{{ .Values.labels.name }}-{{ .Values.labels.shortRegion }}
+    app.kubernetes.io/name: blast-{{ .Values.labels.name }}-{{ .Values.labels.shortRegion }}
+    app.kubernetes.io/part-of: blast
+  ports:
+  {{- range $name, $value := .Values.services }}
+  - name: {{ $name }}
+    protocol: "{{ $value.protocol }}"
+    port: {{ $value.externalPort }}
+    targetPort: {{ $value.internalPort }}
+  {{- end }}
+{{- end }}
