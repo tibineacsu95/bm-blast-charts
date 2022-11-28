@@ -9,7 +9,6 @@ data:
       host = "{{ .Values.redisHost }}"
     [sqs]
       q_name = "{{ .Values.sqsQueue }}"
-      role_arn = "{{ .Values.role.assumed }}"
     {{- if eq $.Values.labels.purpose "public" }}
     [public_api]
       enabled = true
